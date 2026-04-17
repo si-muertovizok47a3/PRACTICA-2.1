@@ -1,0 +1,24 @@
+import os
+import  fileinput
+
+filename = input("Введите путь до файла: ")
+
+if not os.path.exists(filename):
+    exit(1)
+
+with fileinput.input(filename, inplace=True) as f:
+    for line in f:
+        words = line.split()
+        new_words = []
+
+        for word in words:
+            try:
+                num = float(word)
+                if num % 7 == 0:
+                    answ = num * 100 / (73 ** 2 + 29)
+                    new_words.append(str(answ))
+                else:
+                    new_words.append(word)
+            except ValueError:
+                new_words.append(word)
+        print(" ".join(new_words))
