@@ -1,0 +1,108 @@
+import json
+import os
+
+
+def get_id(filename):
+    if not os.path.exists(filename) or not os.path.getsize(filename):
+        return 1
+
+    with open(filename, "r", encoding="utf-8") as f:
+        try:
+            data = json.load(f)
+            if not data:
+                return 1
+            return data[-1]['id'] + 1
+        except json.JSONDecodeError:
+            return 1
+
+
+filename = "library.json"
+book_id = get_id(filename)
+while True:
+    choise = input("1. Просмотр всех книг;\n"
+                    "2. Поиск по автору/названию;\n"
+                    "3. Добавление новой книги;\n"
+                    "4. Изменение статуса доступности (взята/возвращена);\n"
+                    "5. Удаление книги по ID;\n"
+                    "6. Экспорт списка доступных книг в текстовый файл available_books.txt\n"
+                    "Выберите действие(ничего не будет введено или введен символ не от 1-6, то произойдёт выход):")
+    match choise:
+        case "1":
+            print("Книги в библиотеке:")
+            with open(filename, "r", encoding="utf-8") as f:
+                library_books = json.load(f)
+                for b in library_books:
+                    status = "В наличии" if b['availability'] else "Выдана"
+                    print(f"[{b['id']}] {b['title']} — {b['author']} ({status})")
+        case "2":
+            search = input("Введите название книги или имя автора: ")
+            count = 0
+            with open(filename, "r", encoding="utf-8") as f:
+                library_books = json.load(f)
+                for b in library_books:
+                    if search in b['title'] or search in b['author']:
+                        status = "В наличии" if b['availability'] else "Выдана"
+                        print(f"[{b['id']}] {b['title']} — {b['author']} ({b['year']} год) ({status})")
+                        count += 1
+                if count == 0:
+                    print("Книга с таким автором/названием не найдена!!!")
+        case "3":
+            print(f"Добавление книги (ID: {book_id})")
+            book_title = input("Введите название книги: ")
+            book_author = input("Введите имя автора: ")
+            book_year = int(input("Введите год издания книги: "))
+            book_availability = True
+            book_data = {
+                "id": book_id,
+                "title": book_title,
+                "author": book_author,
+                "year": book_year,
+                "availability": book_availability
+            }
+            data = []
+            if os.path.exists(filename) and os.path.getsize(filename) > 0:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            data.append(book_data)
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            print(f"Книга успешно добавлена с ID: {book_id}")
+        case "4":
+            book_id_status = int(input("Введите ID книги: "))
+            with open(filename, "r", encoding="utf-8") as f:
+                library_books = json.load(f)
+            found = False
+            for b in library_books:
+                if b['id'] == book_id_status:
+                    found = True
+                    choice = input("Выберите статус (1 — В наличии, 2 — Нет в наличии): ")
+                    if choice == "1":
+                        b['availability'] = True
+                    else:
+                        b['availability'] = False
+                    print(f"Статус книги '{b['title']}' изменен!")
+                    break
+            if not found:
+                print("Книга с таким ID не найдена.")
+            else:
+                with open(filename, "w", encoding="utf-8") as f:
+                    json.dump(library_books, f, ensure_ascii=False, indent=4)
+        case "5":
+            with open(filename, "r", encoding="utf-8") as f:
+                library_books = json.load(f)
+            book_id_to_delete = int(input("Введите ID книги для удаления: "))
+            library_books = [b for b in library_books if b['id'] != book_id_to_delete]
+            for index, book in enumerate(library_books, 1):
+                book['id'] = index
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(library_books, f, ensure_ascii=False, indent=4)
+            print("Книга удалена.")
+        case "6":
+            with open(filename, "r", encoding="utf-8") as f:
+                library_books = json.load(f)
+            with open("available_books.txt", "w", encoding="utf-8") as f:
+                for b in library_books:
+                    if b['availability']:
+                        f.write(f'Книга: "{b['title']}" {b['year']} года в наличии\n')
+        case _:
+            break
