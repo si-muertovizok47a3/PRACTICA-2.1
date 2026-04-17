@@ -1,0 +1,41 @@
+import os
+
+filename = input("Введите путь до бинарного файла который будем шифровать: ")
+
+if not os.path.exists(filename):
+    print(f"Ошибка: Файл '{filename}' не найден.")
+    exit(1)
+
+try:
+    while True:
+        choise = int(input("1. Зашифровать файл;\n2. Расшифровать файл;\n"
+                           "Ваш выбор(если введёте любой другое число программа закочнит работу): "))
+        match choise:
+            case 1:
+                with open(filename, "rb") as file:
+                    data = file.read()
+                encrypted_data = bytearray()
+
+                for i in data:
+                    shifted = ((i << 2) | (i >> (8 - 2))) & 0xFF
+                    ciphered_byte = shifted ^ 42
+                    encrypted_data.append(ciphered_byte)
+
+                with open(filename, "wb") as file:
+                    file.write(encrypted_data)
+            case 2:
+                with open(filename, "rb") as file:
+                    data = file.read()
+                decrypted_data  = bytearray()
+
+                for i in data:
+                    temp = i ^ 42
+                    decryption_byte = ((temp >> 2) | (temp << 6)) & 0xFF
+                    decrypted_data .append(decryption_byte)
+
+                with open(filename, "wb") as file:
+                    file.write(decrypted_data)
+            case _:
+                break
+except ValueError:
+    print("Введено некоректное значение!!!")
