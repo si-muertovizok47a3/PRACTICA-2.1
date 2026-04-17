@@ -1,0 +1,52 @@
+import csv
+
+try:
+    with open("products.csv", "r+", newline="", encoding="utf-8") as file:
+        while True:
+            choise = int(input("1)Добавить товар;\n2)Найти товар;"
+                               "\n3)Узнать счтоимость всех товаров на складе;\n4)Выход.\nЧто вы хотите сделать: "))
+            match choise:
+                case 1:
+                    file.seek(0, 2)
+                    name_products = input("Введите название товара: ")
+                    price = float(input("Введите цену: "))
+                    count_products = int(input("Введите количество товара: "))
+                    new_product = [name_products, price, count_products]
+                    writer = csv.writer(file)
+                    writer.writerow(new_product)
+                    print(f"Продукт {name_products} успешно добавлен")
+                case 2:
+                    file.seek(0)
+                    search_name = input("Введите название продукта: ").strip().lower()
+                    reader = csv.reader(file)
+                    found = False
+                    for row in reader:
+                        if row and row[0].lower() == search_name:
+                            print(f"Результат: {row[0]} - {row[1]} руб. - {row[2]} шт.")
+                            found = True
+                            break
+                    if not found:
+                        print("Товар не найден.")
+                case 3:
+                    file.seek(0)
+                    reader = csv.reader(file)
+                    total_sum = 0
+                    for row in reader:
+                        if row:
+                            total_sum += int(row[1]) * int(row[2])
+                    print(f"Общая стоимость товаров на складе: {total_sum} руб.")
+                case 4:
+                    print("Выход!")
+                    break
+        reader = csv.reader(file)
+        data = [line for line in reader]
+        sorted_data = sorted(data, key=lambda x: int(x[1]), reverse=False)
+        with open("sorted_products.csv", "w", newline="", encoding="utf-8") as file2:
+            writer = csv.writer(file2)
+            writer.writerows(sorted_data)
+    file.close()
+    file2.close()
+except FileNotFoundError:
+    print("Ошибка: Файл не найден.")
+except ValueError:
+    print("Вы ввели некоректное значение")
