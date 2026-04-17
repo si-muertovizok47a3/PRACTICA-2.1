@@ -1,0 +1,42 @@
+import math
+import logging
+
+logging.basicConfig(level=logging.INFO, filename='calculator.log', filemode='a',
+                    format='%(asctime)s %(message)s', encoding='utf-8', datefmt='[%Y-%m-%d %H:%M:%S]')
+print("Последнии 5 операций:")
+with open("calculator.log", 'r', encoding= "utf-8") as file:
+    lines = file.readlines()
+    for line in lines[-5:]:
+        print(line.strip())
+try:
+    while True:
+        number1 = float(input("\nВведите 1-ое число: "))
+        number2 = float(input("Введите 2-ое число: "))
+        choise = input("+\t-\t*\t/\tlog\tsin\nВыберите одну из представленных операций(если ничего не будет введено произойдёт выход): ")
+
+        match choise:
+            case "+":
+                logging.info(f"{number1} + {number2} = {number1 + number2}")
+            case "-":
+                logging.info(f"{number1} - {number2} = {number1 - number2}")
+            case "*":
+                logging.info(f"{number1} * {number2} = {number1 * number2}")
+            case "/":
+                logging.info(f"{number1} / {number2} = {number1 / number2}")
+            case "log":
+                if number1 <= 0 or number2 <= 0 or number2 == 1:
+                    print("Ошибка: Недопустимые аргументы для логарифма!")
+                    logging.error(f"Ошибка логарифма: log({number1}, {number2})")
+                    continue
+                logging.info(f"log({number1}, base={number2}) = {math.log(number1, number2)}")
+
+            case "sin":
+                logging.info(f"sin 1-ого числа = {math.sin(number1)}\nsin 2-ого числа = {math.sin(number2)}")
+            case _:
+                break
+except ValueError:
+    print("Ошибка ввода: некоректные данные!")
+    logging.error("Ошибка ввода: некоректные данные!")
+except ZeroDivisionError:
+    print("Ошибка: деление на ноль!")
+    logging.error("Ошибка: деление на ноль!")
